@@ -16,6 +16,7 @@ dimensions_inches = {
     "A2": (42.0 * cm, 59.4 * cm),
     "A1": (59.4 * cm, 84.1 * cm),
     "A0": (84.1 * cm, 118.8 * cm),
+    "70": (70*cm, 70*cm)
 }
 
 
@@ -239,6 +240,14 @@ custom_themes = {
     },
     "royal-stewart3": {
         "building_palette": ["#1D1634", "#BE0E1B", "#B46D70", "#E8C2BD", "#943A34"],
+        "background_color": "#ffffff",
+    },
+    "edern": {
+        "building_palette": [
+            "#217a79",
+            "#105965",
+            "#074050",
+        ],
         "background_color": "#ffffff",
     },
 }
