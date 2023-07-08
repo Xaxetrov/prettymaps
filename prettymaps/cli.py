@@ -20,30 +20,26 @@ dimensions_inches = {
 }
 
 
-def make_theme(building_palette, background_color, bw=False):
+def make_theme(color_overrides, bw=False):
     return {
         "background": {
-            "fc": "#fff" if bw else background_color,
+            "fc": "#fff" if bw else color_overrides["background_color"],
             "ec": "#fff" if bw else "#dadbc1",
-            "hatch": "......",
+            "hatch": "ooo",
             "zorder": -1,
         },
         "perimeter": {"fill": False, "lw": 0.1 if bw else 0, "zorder": 0},
         "green": {
-            "fc": "#ffffff" if bw else "#8BB174",
+            "fc": "#ffffff" if bw else color_overrides.get("green_color","#8BB174"),
             "ec": "#000" if bw else "#2F3737",
-            "hatch_c": "#ffffff" if bw else "#A7C497",
-            "hatch": "......",
-            "lw": 0.2 if bw else 1,
+            "lw": 0.2,
             "zorder": 1,
-            "alpha": 0.5,
         },
         "garden": {
-            "fc": "#ffffff" if bw else "#72C07A",
+            "fc": "#ffffff" if bw else color_overrides.get("garden_color", "#72C07A"),
             "ec": "#000000" if bw else "#64a38d",
-            "lw": 0,
+            "lw": 0.2,
             "zorder": 1,
-            "hatch": "......",
         },
         "water": {
             "fc": "#ffffff" if bw else "#a8e1e6",
@@ -54,58 +50,57 @@ def make_theme(building_palette, background_color, bw=False):
         "streets": {
             "fc": "#ffffff" if bw else "#2F3737",
             "ec": "#000000" if bw else "#475657",
-            "alpha": 1,
             "lw": 0,
             "zorder": 4,
         },
-        "pedestrian": {
-            "fc": "#ffffff" if bw else "#2F3737",
+        "railway": {
+            "fc": "#ffffff" if bw else "#526161",
             "ec": "#000000" if bw else "#475657",
-            "alpha": 1,
+            "lw": 0,
+            "zorder": 6,
+        },
+        "pedestrian": {
+            "fc": "#ffffff" if bw else color_overrides.get("pedestrian_color", "#2F3737"),
+            "ec": "#000000" if bw else "#475657",
             "lw": 0,
             "zorder": 4,
         },
         "building": {
-            "palette": building_palette if not bw else ["#ffffff"],
+            "palette": color_overrides["building_palette"] if not bw else ["#ffffff"],
             "ec": "#000000" if bw else "#2F3737",
             "lw": 0.5,
             "zorder": 5,
         },
         "parking": {
-            "palette": building_palette if not bw else ["#ffffff"],
+            "fc": "#ffffff" if bw else color_overrides.get("parking_color", "#2F3737"),
             "ec": "#000000" if bw else "#2F3737",
             "lw": 0.6 if bw else 0.5,
             "zorder": 5,
         },
         "forest": {
-            "fc": "#ffffff" if bw else "#8BB174",
+            "fc": "#ffffff" if bw else color_overrides.get("forest_color", "#8BB174"),
             "ec": "#000000" if bw else "#2F3737",
-            "hatch_c": "#ffffff" if bw else "#A7C497",
-            "hatch": "......",
-            "lw": 1,
+            "lw": 0.2,
             "zorder": 1,
-            "alpha": 0.5,
         },
         "park": {
-            "fc": "#ffffff" if bw else "#AAD897",
+            "fc": "#ffffff" if bw else color_overrides.get("park_color", "#AAD897"),
             "ec": "#000000" if bw else "#8bc49e",
             "lw": 0,
             "zorder": 1,
-            "hatch": "......",
         },
         "wetland": {
             "fc": "#ffffff" if bw else "#D2D68D",
             "ec": "#000000" if bw else "#AEB441",
             "lw": 0,
             "zorder": 3,
-            "hatch": "......",
         },
         "beach": {
             "fc": "#ffffff" if bw else "#e3da8d",
             "ec": "#000000" if bw else "#AEB441",
             "lw": 0,
             "zorder": 3,
-            "hatch": "",
+            "hatch": "......",
         },
     }
 
@@ -114,7 +109,7 @@ def generate_layers(circle, river_overflow):
     return {
         "perimeter": {},
         "streets": {
-            "custom_filter": '["highway"~"motorway|trunk|primary|secondary|tertiary|residential|service|unclassified|pedestrian|footway"]',
+            "custom_filter": None,
             "width": {
                 "motorway": 5,
                 "trunk": 5,
@@ -122,11 +117,25 @@ def generate_layers(circle, river_overflow):
                 "secondary": 4,
                 "tertiary": 3.5,
                 "residential": 3,
+                "cycleway": 2,
                 "service": 2,
                 "unclassified": 2,
                 "pedestrian": 2,
                 "footway": 1,
             },
+            "circle": circle,
+        },
+        # "railway": {
+        #     "custom_filter": None,
+        #     "width": {
+        #         "rail": 2,
+        #     },
+        #     "circle": circle,
+        # },
+        'railway': {
+            'custom_filter': '["railway"~"rail|light_rail|subway"]',
+            'dilate': 0, # 2000,
+            'width': 2,
             "circle": circle,
         },
         "park": {
@@ -164,12 +173,16 @@ def generate_layers(circle, river_overflow):
         "parking": {
             "tags": {
                 "amenity": "parking",
-                "highway": "pedestrian",
-                "man_made": "pier",
             },
             "circle": circle,
         },
-        "pedestrian": {"tags": {"area:highway": "pedestrian"}},
+        "pedestrian": {
+            "tags": {
+                "highway": "pedestrian",
+                "area:highway": "pedestrian",
+                "man_made": "pier",
+            }
+            },
         "wetland": {"tags": {"natural": "wetland", "natural": "scrub"}},
         "beach": {"tags": {"natural": "beach"}},
         "garden": {"tags": {"leisure": "garden"}},
@@ -243,12 +256,18 @@ custom_themes = {
         "background_color": "#ffffff",
     },
     "edern": {
+        "background_color": "#f2f4cb",
         "building_palette": [
-            "#217a79",
-            "#105965",
             "#074050",
+            "#105965",
+            "#217a79",
         ],
-        "background_color": "#ffffff",
+        "forest_color": "#92ba7b",
+        "garden_color": "#a8c995",
+        "green_color": "#c2e8ac",
+        "park_color": "#edf0b6",
+        "pedestrian_color": "#f2f4cb",
+        "parking_color": "#bfc1a0",
     },
 }
 
@@ -447,7 +466,7 @@ def draw(
         background_color = f"#{background_color}"
 
     themes = {
-        name: make_theme(**theme_params, bw=bw)
+        name: make_theme(theme_params, bw=bw)
         for name, theme_params in custom_themes.items()
     }
     if theme in themes:
@@ -491,7 +510,7 @@ def draw(
             filename,
             img_dimensions_inches=figsize,
             margin_cm=margins_mm / 10,
-            rgb_color=(255, 255, 255),
+            rgb_color=(7, 64, 80),
             dpi=dpi,
         )
 
